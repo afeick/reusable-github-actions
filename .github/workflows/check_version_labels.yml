@@ -1,0 +1,72 @@
+name: Version Check
+
+on:
+  workflow_call:
+    inputs:
+      pr_label_major:
+        description: "PR label name to use for bumping the major version."
+        required: false
+        default: "major"
+      pr_label_minor:
+        description: "PR label name to use for bumping the minor version."
+        required: false
+        default: "minor"
+      pr_label_patch:
+        description: "PR label name to use for bumping the patch version."
+        required: false
+        default: "patch"
+      pr_label_norelease:
+        description: "PR label name to use for skipping the release."
+        required: false
+        default: "no version"
+
+jobs:
+  check_pr_labels:
+    name: Verify PR label(s)
+    runs-on: ubuntu-latest
+    env:
+      LABEL: ""
+      LABEL_COUNT: 0
+    steps:
+      - name: Check Labels
+        shell: bash
+        env:
+          PR_LABELS_JSON: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          MAJOR_LABEL: ${{ inputs.pr_label_major }}
+          MINOR_LABEL: ${{ inputs.pr_label_minor }}
+          PATCH_LABEL: ${{ inputs.pr_label_patch }}
+          NO_RELEASE_LABEL: ${{ inputs.pr_label_norelease }}
+          LABEL_COUNT: 0
+          LABEL: ""
+        run: |
+          # Checking PR version labels
+          declare -a VERSION_LABELS=( "${MAJOR_LABEL}" "${MINOR_LABEL}" "${PATCH_LABEL}" "${NO_RELEASE_LABEL}" )
+          printf -v JOINED_LABELS "'%s', " "${VERSION_LABELS[@]}"
+
+          readarray -t PR_LABELS < <(echo ${PR_LABELS_JSON} | jq -r '.[]')
+
+          for version in "${VERSION_LABELS[@]}"; do
+            echo "checking for version: ${version}"
+            for label in "${PR_LABELS[@]}"; do
+            echo "comparing label: ${label}"
+            if [[ ${version} == ${label} ]]; then
+              echo "match: '${version}' == '${label}'"
+              LABEL_COUNT=$((LABEL_COUNT+1))
+              LABEL=${label}
+            fi
+            done
+          done
+          echo "LABEL_COUNT=${LABEL_COUNT}"
+          echo "LABEL=${LABEL}"
+
+          if [[ ${LABEL_COUNT} == 1 ]]; then
+            echo "::notice::Version verified!"
+            echo "::notice::Successfully identified version label for PR: ${LABEL}"
+          elif [[ ${LABEL_COUNT} < 1 ]]; then
+            echo "::error::No version label detected!"
+            echo "::error::PRs require one of the following labels: ${JOINED_LABELS%, }"
+          elif [[ ${LABEL_COUNT} > 1 ]]; then
+            echo "::error::Too many versions detected!"
+            echo "::error::Remove extra version label(s). Only one of the following is allowed: ${JOINED_LABELS%, }"
+          fi
+          exit $((LABEL_COUNT-1))
