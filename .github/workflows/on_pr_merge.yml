@@ -10,15 +10,9 @@ on:
     branches:
       - main
 
+
 jobs:
   create_release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: afeick/reusable-github-actions/.github/workflows/create_release.yml@main
-        permissions:
-          contents: write
-        with:
-          pr_label_patch: bug
-          pr_label_norelease: no-version
-        secrets:
-          token: ${{ secrets.GITHUB_TOKEN }}
+    uses: afeick/reusable-github-actions/.github/workflows/create_release.yml@main
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}

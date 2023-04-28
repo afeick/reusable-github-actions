@@ -11,9 +11,7 @@ concurrency:
 
 jobs:
   check_pr_labels:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: afeick/reusable-github-actions/.github/workflows/check_version_labels.yml@main
-        with:
-          pr_label_patch: bug
-          pr_label_norelease: no-version
+    uses: afeick/reusable-github-actions/.github/workflows/check_version_labels.yml@main
+    with:
+      pr_label_patch: bug
+      pr_label_norelease: no-version
