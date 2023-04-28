@@ -6,18 +6,22 @@ on:
       pr_label_major:
         description: "PR label name to use for bumping the major version."
         required: false
+        type: string
         default: "major"
       pr_label_minor:
         description: "PR label name to use for bumping the minor version."
         required: false
+        type: string
         default: "minor"
       pr_label_patch:
         description: "PR label name to use for bumping the patch version."
         required: false
+        type: string
         default: "patch"
       pr_label_norelease:
         description: "PR label name to use for skipping the release."
         required: false
+        type: string
         default: "no version"
 
 jobs:
