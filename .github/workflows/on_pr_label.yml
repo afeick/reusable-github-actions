@@ -1,0 +1,18 @@
+name: Version Check
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
+jobs:
+  check_pr_labels:
+    uses: afeick/reusable-github-actions/.github/workflows/check_version_labels.yml@main
+    with:
+      pr_label_patch: bug
+      pr_label_norelease: no-version
+ 
